@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "ged-365-client-side-solution",
+    "id": "0252322b-8200-4b28-b1c3-14b6cfd8daf0",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "GED365 description"
+      },
+      "longDescription": {
+        "default": "GED365 description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "ged-365 Feature",
+        "description": "The feature that activates elements of the ged-365 solution.",
+        "id": "2efb3be9-1845-46d0-94e3-0d1cb1e4134d",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/ged-365.sppkg"
+  }
+}
