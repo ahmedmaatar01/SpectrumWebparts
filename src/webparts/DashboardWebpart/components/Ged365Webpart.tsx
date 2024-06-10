@@ -186,6 +186,7 @@ export default class Ged365Webpart extends React.Component<
                   table_items={this.state.listItems}
                   onDirectoryClick={this.handleDirectoryClick}
                   text_color={this.props.textColor}
+                  listTitle={this.props.list_title}
                 />
               </div>
             </div>
