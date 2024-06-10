@@ -80,121 +80,66 @@
 }
 
 /* Define table styles */
+
 .table-section {
   padding: 10px;
 
-}
-.table-section{
   table {
     border-collapse: separate !important;
     border-spacing: 0 10px;
-    /* Espace entre les lignes */
     width: 100%;
   }
-  
+
   th,
   td {
     padding: 5px 20px;
     text-align: left;
     font-size: 12px;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
   }
-  
+
   .document-a {
-    font-size: 12;
+    font-size: 12px;
     font-weight: 600;
     text-decoration: none;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
   }
-  
+
   .document-a:hover {
-    font-weight: 800;
+    font-weight: 700;
   }
-  
+
   tbody tr {
     background-color: #ffffff12;
     border-radius: 10px;
-    /* Bords arrondis */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease;
   }
-  
+
   tbody tr:hover {
     background-color: #f5f5f576;
   }
-  
+
   .table-section th {
     text-align: left;
+    text-transform: capitalize;
   }
-  
-  
-  
+
   td:first-child {
     border-bottom-left-radius: 10px;
     border-top-left-radius: 10px;
   }
-  
+
   td:last-child {
     border-bottom-right-radius: 10px;
     border-top-right-radius: 10px;
   }
-  
 }
 
-
-
-/* Define button styles */
-// .button {
-//   margin-right: 5px;
-// }
-
-// .card_header {
-//   display: flex;
-//   justify-content: space-between;
-//   align-items: center;
-//   margin-bottom: 10px;
-// }
-
-// .cardsContainer {
-//   display: flex;
-//   flex-wrap: wrap;
-// }
-
-// .card {
-//   background-color: rgb(238, 238, 238);
-//   border-radius: 8px;
-//   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-//   margin: 10px;
-//   padding: 0 20px 20px 20px;
-//   width: calc(33.33% - 20px);
-//   box-sizing: border-box;
-// }
-
-// .align-right-items {
-//   display: flex;
-//   justify-content: flex-end;
-// }
-
-// .card h3 {
-//   color: #333;
-// }
-
-// .cardContent {
-//   color: #666;
-//   text-align: left;
-// }
-
-// .cardContent strong {
-//   color: #000;
-// }
-
-// .card button {
-
-//   .actionDropdown {
-//     position: absolute;
-//     top: 10px;
-//     right: 10px;
-//   }
-
-// }
 
 .breadcrumbPersonaliser {
 
@@ -210,7 +155,6 @@
 }
 
 .breadcrumbPersonaliser li a {
-  color: #ffffff;
   padding: .1rem .1rem;
   text-decoration: none;
   font-weight: 600;
@@ -220,5 +164,4 @@
 
 .breadcrumbPersonaliser li a:hover {
   font-weight: 700;
-  border-bottom: 2px solid #fff;
 }

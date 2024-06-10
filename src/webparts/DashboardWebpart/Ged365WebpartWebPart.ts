@@ -21,7 +21,6 @@ export interface IGed365WebpartWebPartProps {
   description: string;
   list_titles: IDropdownOption[];
   list_title: string;
-  displayType: string;
   backgroundColor: string;
   textColor: string;
   selectedColumns: string[];
@@ -51,9 +50,9 @@ export default class Ged365WebpartWebPart extends BaseClientSideWebPart<IGed365W
         userDisplayName: this.context.pageContext.user.displayName,
         context: this.context,
         list_title: this.properties.list_title,
-        displayType: this.properties.displayType,
         backgroundColor: this.properties.backgroundColor,
         textColor: this.properties.textColor,
+        selectedColumns: this.properties.selectedColumns
       }
     );
 
@@ -67,6 +66,12 @@ export default class Ged365WebpartWebPart extends BaseClientSideWebPart<IGed365W
       // Set default background color if not set
       if (!this.properties.backgroundColor) {
         this.properties.backgroundColor = '#3c3b5e';
+      }
+      if (!this.properties.textColor) {
+        this.properties.textColor = '#ffffff';
+      }
+      if (!this.properties.selectedColumns || this.properties.selectedColumns.length === 0) {
+        this.properties.selectedColumns = ['FileLeafRef'];
       }
 
       // Fetch all lists
@@ -142,21 +147,19 @@ export default class Ged365WebpartWebPart extends BaseClientSideWebPart<IGed365W
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
-                }),
                 PropertyPaneDropdown('list_title', {
                   label: "select a title",
                   options: this.properties.list_titles,
                   selectedKey: this.properties.list_title,
                 }),
-                PropertyPaneDropdown('displayType', {
-                  label: "Select display type",
-                  options: [
-                    { key: 'table', text: 'Table' },
-                    { key: 'grid', text: 'Grid' }
-                  ],
-                  selectedKey: this.properties.displayType
+                PropertyPaneTextField('description', {
+                  label: strings.DescriptionFieldLabel
+                }),
+                PropertyFieldMultiSelect('selectedColumns', {
+                  key: 'selectedColumns',
+                  label: 'Select columns to display',
+                  options: this.properties.columnOptions || [], // Use dynamic column options
+                  selectedKeys: this.properties.selectedColumns
                 }),
                 PropertyFieldColorPicker('backgroundColor', {
                   label: "Select background color",
@@ -179,13 +182,8 @@ export default class Ged365WebpartWebPart extends BaseClientSideWebPart<IGed365W
                   alphaSliderHidden: false,
                   style: PropertyFieldColorPickerStyle.Full,
                   key: 'textColorFieldId'
-                }),
-                PropertyFieldMultiSelect('selectedColumns', {
-                  key: 'selectedColumns',
-                  label: 'Select columns to display',
-                  options: this.properties.columnOptions || [], // Use dynamic column options
-                  selectedKeys: this.properties.selectedColumns
                 })
+      
               ]
             }
           ]
@@ -197,17 +195,22 @@ export default class Ged365WebpartWebPart extends BaseClientSideWebPart<IGed365W
   private _fetchColumns(listTitle: string): Promise<void> {
     return this._spOperations.GetListColumns(this.context, listTitle)
       .then((columns: SPListColumn[]) => {
-        const columnOptions = columns.map(column => ({
-          key: column.internalName,
-          text: column.title
-        }));
+        const excludedColumns = ["Title", "_ExtendedDescription", "ContentType"];
+        const columnOptions = columns
+          .filter(column => !excludedColumns.includes(column.internalName))
+          .map(column => ({
+            key: column.internalName,
+            text: column.title
+          }));
         this.properties.columnOptions = columnOptions;
+  
         this.context.propertyPane.refresh(); // Refresh the property pane to show new column options
       })
       .catch(error => {
         console.error('Error fetching columns:', error);
       });
   }
+  
 
   protected onPropertyPaneFieldChanged(propertyPath: string, oldValue: any, newValue: any): void {
     if (propertyPath === 'backgroundColor' && newValue !== oldValue) {

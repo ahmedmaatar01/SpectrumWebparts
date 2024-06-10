@@ -39,26 +39,20 @@ export default class Ged365Webpart extends React.Component<
   }
 
   public componentDidMount() {
-    this.fetchDocLibColsTitles()
+    this.fetchDocLibColsTitles();
     this.GetDocuments();
     this.fetchFileAndFolderCounts();
-    console.log("did mount >>>>>>>>>>>>>>>>>>>");
   }
 
   public componentDidUpdate(prevProps: IGed365WebpartProps) {
-    console.log("did update >>>>>>>>>>>>>>>>>>>");
-
-    if (prevProps.list_title !== this.props.list_title) {
-      console.log("did update title changed>>>>>>>>>>>>>>>>>>>");
+    if (prevProps.list_title !== this.props.list_title || prevProps.selectedColumns !== this.props.selectedColumns) {
       this.setState({
         directory_link: this.props.context.pageContext.web.serverRelativeUrl + "/" + this.props.list_title,
+      }, () => {
+        this.fetchDocLibColsTitles();
+        this.GetDocuments();
+        this.fetchFileAndFolderCounts();
       });
-      console.log("this.state.directory_link--------update-------------->")
-      console.log(this.state.directory_link)
-      this.fetchDocLibColsTitles();
-      this.GetDocuments();
-      this.fetchFileAndFolderCounts();
-
     }
   }
 
@@ -67,128 +61,109 @@ export default class Ged365Webpart extends React.Component<
       .GetListColumns(this.props.context, this.props.list_title)
       .then((result: SPListColumn[]) => {
         const internalNames = result.map(col => col.internalName);
+        const filteredCols = result.filter(col => this.props.selectedColumns.includes(col.internalName));
         this.setState({
-          documents_cols: result,
+          documents_cols: filteredCols,
           items_cols: internalNames
         });
-
       })
       .catch(error => {
         console.error('Error fetching doc cols:', error);
       });
   }
 
-
   private async fetchFileAndFolderCounts() {
     try {
       const { fileCount, folderCount } = await this._spOperations.GetFileAndFolderCounts(this.props.context, this.props.list_title);
       this.setState({ fileCount, folderCount });
-      console.log("stats" + { fileCount, folderCount })
-      console.log("files " + this.state.fileCount + "folders " + this.state.folderCount)
     } catch (error) {
       console.error('Error fetching file and folder counts:', error);
     }
   }
+
   private getFocLibItemsFromNavClick(clickedItem: string) {
     const indexOfClickedItem = this.state.nav_links.indexOf(clickedItem);
 
     if (indexOfClickedItem !== -1) {
       const updatedNavLinks = this.state.nav_links.slice(0, indexOfClickedItem + 1);
       this.setState({ nav_links: updatedNavLinks });
-      //directory_link
-      let new_link: string;
-      new_link = this.props.context.pageContext.web.serverRelativeUrl
+      let new_link: string = this.props.context.pageContext.web.serverRelativeUrl;
 
       updatedNavLinks.forEach(element => {
         new_link = new_link + '/' + element;
-        console.log("new link :" + new_link)
         this.setState({
           directory_link: new_link,
         });
       });
 
-      console.log("api link" + this.state.directory_link)
       this.GetDocuments();
     }
   }
 
   private GetDocuments() {
-    this.fetchDocLibColsTitles();
     if (this.state.directory_link.indexOf(this.props.list_title) !== -1) {
-      let startIndex = this.state.directory_link.indexOf(this.props.list_title);
-      let nav_links_string = this.state.directory_link.substring(startIndex);
-      let nav_links_tab = nav_links_string.split("/");
-      console.log(nav_links_tab)
+      const startIndex = this.state.directory_link.indexOf(this.props.list_title);
+      const nav_links_string = this.state.directory_link.substring(startIndex);
+      const nav_links_tab = nav_links_string.split("/");
 
       this.setState({
         nav_links: nav_links_tab,
       });
-    } else if (!this.state.directory_link || this.state.directory_link == "") {
+    } else if (!this.state.directory_link || this.state.directory_link === "") {
       this.setState({
         directory_link: this.props.context.pageContext.web.serverRelativeUrl + "/" + this.props.list_title,
-      });
-      this.setState({
         nav_links: [this.props.list_title],
       });
     }
 
-    console.log("GetDocuments >>>>>>>>>>>>")
-    console.log("this.props.context")
-    console.log(this.props.context)
-    console.log("list_title >>>>>>>>>>>>")
-    console.log(this.props.list_title)
-    console.log("this.state.directory_link >>>>>>>>>>>>")
-    console.log(this.state.directory_link)
     if (!this.state.directory_link || this.state.directory_link.indexOf(this.props.list_title) === -1) {
       this.setState({
-          directory_link: this.props.context.pageContext.web.serverRelativeUrl + "/" + this.props.list_title,
-          nav_links: [this.props.list_title]
+        directory_link: this.props.context.pageContext.web.serverRelativeUrl + "/" + this.props.list_title,
+        nav_links: [this.props.list_title]
       }, () => {
-          this._spOperations
-              .GetDocLibItems(this.props.context, this.props.list_title, this.state.directory_link)
-              .then((results: any[]) => {
-                  this.setState({ listItems: results });
-              })
-              .catch(error => {
-                  console.error('Error updating list items:', error);
-              });
-      });
-  } else {
-      this._spOperations
+        this._spOperations
           .GetDocLibItems(this.props.context, this.props.list_title, this.state.directory_link)
           .then((results: any[]) => {
-              this.setState({ listItems: results });
+            this.setState({ listItems: results });
           })
           .catch(error => {
-              console.error('Error updating list items:', error);
+            console.error('Error updating list items:', error);
           });
-  }
-
+      });
+    } else {
+      this._spOperations
+        .GetDocLibItems(this.props.context, this.props.list_title, this.state.directory_link)
+        .then((results: any[]) => {
+          this.setState({ listItems: results });
+        })
+        .catch(error => {
+          console.error('Error updating list items:', error);
+        });
+    }
   }
 
   private handleDirectoryClick = (path: string) => {
     this.setState({ directory_link: this.state.directory_link + "/" + path }, () => {
       this.GetDocuments();
     });
-    console.log("this.state.directory_link");
-    console.log(this.state.directory_link);
   }
 
   public render(): React.ReactElement<IGed365WebpartProps> {
     const { description, hasTeamsContext } = this.props;
-  
+
     if (!this.props.list_title) {
       return (
         <>
-          <h4>selectionner la liste que vous souhaiter visualiser</h4>
+          <h4>Selectionner la liste que vous souhaiter visualiser</h4>
         </>
       )
     }
+
     return (
       <section className={`${styles.ged365Webpart} ${hasTeamsContext ? styles.teams : ''}`}>
         <div className={styles.webpartContainer} style={{ backgroundColor: this.props.backgroundColor }}>
           <div className='row'>
-            <div className='col-2 text-white d-flex flex-column justify-content-center'>
+            <div className='col-2 text-white d-flex flex-column justify-content-center' >
               <h5 style={{color:this.props.textColor}}>Bibliothéque : {this.props.list_title}</h5>
               <hr style={{color:this.props.textColor}} />
               <h6 style={{color:this.props.textColor}}>Documents</h6>
@@ -198,10 +173,10 @@ export default class Ged365Webpart extends React.Component<
             </div>
             <div className='col-10'>
               <div className={styles['table-section']}>
-                <nav aria-label="breadcrumb" >
+                <nav aria-label="breadcrumb">
                   <ol className={styles.breadcrumbPersonaliser}>
                     {this.state.nav_links.map((item, index) => (
-                      <li key={index}><a href="#" onClick={() => this.getFocLibItemsFromNavClick(item)}>{item} </a> <i className="fas fa-chevron-right text-white p-2"></i> </li>
+                      <li key={index}><a href="#" style={{ color: this.props.textColor }} onClick={() => this.getFocLibItemsFromNavClick(item)}>{item} </a> <i style={{ color: this.props.textColor }} className="fas fa-chevron-right  p-2"></i> </li>
                     ))}
                   </ol>
                 </nav>
@@ -210,15 +185,14 @@ export default class Ged365Webpart extends React.Component<
                   table_headings={this.state.documents_cols}
                   table_items={this.state.listItems}
                   onDirectoryClick={this.handleDirectoryClick}
-                  text_color={this.props.textColor} // Pass textColor
+                  text_color={this.props.textColor}
                 />
               </div>
             </div>
           </div>
-          <div style={{ color:this.props.textColor}}> <strong>{escape(description)}</strong></div>
+          <div style={{ color: this.props.textColor }}> <strong>{escape(description)}</strong></div>
         </div>
       </section>
     );
   }
-  
 }

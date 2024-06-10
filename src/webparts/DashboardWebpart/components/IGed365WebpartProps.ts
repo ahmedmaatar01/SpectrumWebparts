@@ -8,8 +8,8 @@ export interface IGed365WebpartProps {
   userDisplayName: string;
   context:WebPartContext;
   list_title:string;
-  displayType:String;
   backgroundColor:string;
   textColor: string; 
+  selectedColumns:string[];
 
 }

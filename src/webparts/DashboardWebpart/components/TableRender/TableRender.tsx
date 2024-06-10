@@ -50,51 +50,48 @@ const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, tab
 
     return (
         <div className={styles['table-section']}>
-            <table className="mon-tableau">
-                <thead>
-                    <tr>
-                        {filteredHeadings.map((heading, index) => (
-                            <th key={index} onClick={() => handleSort(heading.internalName)} style={{color:text_color}}>
-                                {heading.title}
-                                {sortColumn === heading.internalName && (
-                                    sortOrder === 'asc' ? 
-                                    <i className="fas fa-chevron-up ms-1"></i> : 
-                                    <i className="fas fa-chevron-down ms-1"></i>
-                                )}
-                            </th>
-                        ))}
-                        <th style={{color:text_color}}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {docItems.map((item, index) => (
-                        <tr key={index}>
-                            {filteredHeadings.map((heading, idx) => (
-                                <td key={idx}>
-                                    <SingleDocItem
-                                        context={context}
-                                        column={heading}
-                                        item={item}
-                                        onDirectoryClick={onDirectoryClick}
-                                        text_color={text_color}
-                                    />
-                                </td>
+            <div className='table-responsive'>
+                <table className="mon-tableau">
+                    <thead>
+                        <tr>
+                            {filteredHeadings.map((heading, index) => (
+                                <th key={index} onClick={() => handleSort(heading.internalName)} style={{ color: text_color }}>
+                                    {heading.title}
+                                    {sortColumn === heading.internalName && (
+                                        sortOrder === 'asc' ?
+                                            <i className="fas fa-chevron-up ms-1"></i> :
+                                            <i className="fas fa-chevron-down ms-1"></i>
+                                    )}
+                                </th>
                             ))}
-                            <td>
-                                <div className="btn-group" role="group">
-                                    <button id={`btnGroupDrop${index}`} type="button" className="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style={{  color: text_color,border:"1px solid "+ text_color }}>
-                                        <i className="fas fa-ellipsis-h"></i>
-                                    </button>
-                                    <ul className="dropdown-menu" aria-labelledby={`btnGroupDrop${index}`}>
-                                        <li><a className="dropdown-item" href="#">Edit</a></li>
-                                        <li><a className="dropdown-item" href="#">Delete</a></li>
-                                    </ul>
-                                </div>
-                            </td>
+                            <th style={{ color: text_color }}>Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {docItems.map((item, index) => (
+                            <tr key={index}>
+                                {filteredHeadings.map((heading, idx) => (
+                                    <td key={idx}>
+                                        <SingleDocItem
+                                            context={context}
+                                            column={heading}
+                                            item={item}
+                                            onDirectoryClick={onDirectoryClick}
+                                            text_color={text_color}
+                                        />
+                                    </td>
+                                ))}
+                                <td>
+                                    <a style={{ color: text_color }} href=""><i className="fa-solid fa-pen-to-square me-2"></i></a>
+                                    <a style={{ color: text_color }} href=""><i  className="fa-solid fa-trash"></i></a>
+
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     );
 };
