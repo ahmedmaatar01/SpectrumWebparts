@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
   "id": "aecf2876-45b0-4132-a732-408dcb49ee74",
-  "alias": "Ged365WebpartWebPart",
+  "alias": "DashboardWebpartWebPart",
   "componentType": "WebPart",
 
   "version": "*",
@@ -20,7 +20,7 @@
     "officeFabricIconFontName": "Storyboard",
     
     "properties": {
-      "description": "GED365webpart"
+      "description": "Dashboard Webpart"
 
     }
   }]

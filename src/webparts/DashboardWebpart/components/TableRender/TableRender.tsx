@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { SPListItem, SPListColumn } from "../../../Services/SPServices";
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.min.js';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import SingleDocItem from '../Divers/SingleDocItem';
 import styles from '../Ged365Webpart.module.scss';
@@ -11,9 +12,10 @@ interface ITableRenderProps {
     table_headings: SPListColumn[];
     table_items: SPListItem[];
     onDirectoryClick: (path: string) => void;
+    text_color: string;
 }
 
-const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, table_items, onDirectoryClick }) => {
+const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, table_items, text_color, onDirectoryClick }) => {
     const [docItems, setDocItems] = useState<SPListItem[]>([]);
     const [sortColumn, setSortColumn] = useState<string>('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -52,7 +54,7 @@ const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, tab
                 <thead>
                     <tr>
                         {filteredHeadings.map((heading, index) => (
-                            <th key={index} onClick={() => handleSort(heading.internalName)}>
+                            <th key={index} onClick={() => handleSort(heading.internalName)} style={{color:text_color}}>
                                 {heading.title}
                                 {sortColumn === heading.internalName && (
                                     sortOrder === 'asc' ? 
@@ -61,7 +63,7 @@ const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, tab
                                 )}
                             </th>
                         ))}
-                        <th>Actions</th>
+                        <th style={{color:text_color}}>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,18 +76,19 @@ const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, tab
                                         column={heading}
                                         item={item}
                                         onDirectoryClick={onDirectoryClick}
+                                        text_color={text_color}
                                     />
                                 </td>
                             ))}
                             <td>
                                 <div className="btn-group" role="group">
-                                    <button id="btnGroupDrop1" type="button" className="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <button id={`btnGroupDrop${index}`} type="button" className="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style={{  color: text_color,border:"1px solid "+ text_color }}>
                                         <i className="fas fa-ellipsis-h"></i>
                                     </button>
-                                    <div className="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                        <a className="dropdown-item" href="#">edit</a>
-                                        <a className="dropdown-item" href="#">delete</a>
-                                    </div>
+                                    <ul className="dropdown-menu" aria-labelledby={`btnGroupDrop${index}`}>
+                                        <li><a className="dropdown-item" href="#">Edit</a></li>
+                                        <li><a className="dropdown-item" href="#">Delete</a></li>
+                                    </ul>
                                 </div>
                             </td>
                         </tr>

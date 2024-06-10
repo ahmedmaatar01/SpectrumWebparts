@@ -176,7 +176,7 @@ export default class Ged365Webpart extends React.Component<
 
   public render(): React.ReactElement<IGed365WebpartProps> {
     const { description, hasTeamsContext } = this.props;
-
+  
     if (!this.props.list_title) {
       return (
         <>
@@ -186,16 +186,15 @@ export default class Ged365Webpart extends React.Component<
     }
     return (
       <section className={`${styles.ged365Webpart} ${hasTeamsContext ? styles.teams : ''}`}>
-        <div className={styles.webpartContainer}>
+        <div className={styles.webpartContainer} style={{ backgroundColor: this.props.backgroundColor }}>
           <div className='row'>
-
             <div className='col-2 text-white d-flex flex-column justify-content-center'>
-              <h5>Bibliothéque : {this.props.list_title}</h5>
-              <hr />
-              <h6>Documents</h6>
-              <p className={styles.kpi}>{this.state.fileCount}</p>
-              <h6>Dossiers</h6>
-              <p className={styles.kpi}>{this.state.folderCount}</p>
+              <h5 style={{color:this.props.textColor}}>Bibliothéque : {this.props.list_title}</h5>
+              <hr style={{color:this.props.textColor}} />
+              <h6 style={{color:this.props.textColor}}>Documents</h6>
+              <p className={styles.kpi} style={{ WebkitTextStroke:0.5,WebkitTextStrokeColor:this.props.textColor,color:'transparent'}}>{this.state.fileCount}</p>
+              <h6 style={{color:this.props.textColor}}>Dossiers</h6>
+              <p className={styles.kpi} style={{ WebkitTextStroke:0.5,WebkitTextStrokeColor:this.props.textColor,color:'transparent'}}>{this.state.folderCount}</p>
             </div>
             <div className='col-10'>
               <div className={styles['table-section']}>
@@ -211,13 +210,15 @@ export default class Ged365Webpart extends React.Component<
                   table_headings={this.state.documents_cols}
                   table_items={this.state.listItems}
                   onDirectoryClick={this.handleDirectoryClick}
+                  text_color={this.props.textColor} // Pass textColor
                 />
               </div>
             </div>
           </div>
-          <div>Description: <strong>{escape(description)}</strong></div>
+          <div style={{ color:this.props.textColor}}> <strong>{escape(description)}</strong></div>
         </div>
       </section>
     );
   }
+  
 }

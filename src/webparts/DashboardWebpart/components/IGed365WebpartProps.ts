@@ -9,4 +9,7 @@ export interface IGed365WebpartProps {
   context:WebPartContext;
   list_title:string;
   displayType:String;
+  backgroundColor:string;
+  textColor: string; 
+
 }

@@ -9,6 +9,7 @@ interface ISingleDocItemProps {
     column: SPListColumn;
     item: SPListItem;
     onDirectoryClick: (path: string) => void;
+    text_color: string;
 }
 
 const fileIconMap: { [key: string]: string } = {
@@ -29,7 +30,7 @@ const fileIconMap: { [key: string]: string } = {
     'default': 'https://res.cdn.office.net/files/fabric-cdn-prod_20240129.001/assets/item-types/20/genericfile.svg' 
 };
 
-const SingleDocItem: React.FC<ISingleDocItemProps> = ({ context, column, item, onDirectoryClick }) => {
+const SingleDocItem: React.FC<ISingleDocItemProps> = ({ context, column, item, text_color, onDirectoryClick }) => {
     const [userName, setUserName] = useState<string>('');
 
     const fetchUserName = useCallback(async () => {
@@ -58,14 +59,13 @@ const SingleDocItem: React.FC<ISingleDocItemProps> = ({ context, column, item, o
         const path = item[column.internalName];
         onDirectoryClick(path);
     };
-
     if (column.internalName === "FileLeafRef") {
         const fileName = item[column.internalName];
         const fileIconUrl = getFileIconUrl(fileName);
 
         if (item["FileSystemObjectType"] == "1") {
             return (
-                <div className={styles['document-a']} onClick={handleDirectoryClick} style={{ cursor: 'pointer' }}>
+                <div className={styles['document-a']} onClick={handleDirectoryClick} style={{ cursor: 'pointer', color: text_color }}>
                     <img src="https://res.cdn.office.net/files/fabric-cdn-prod_20240129.001/assets/item-types/20/folder.svg" className="me-1" alt="Folder icon" />
                     {fileName}
                 </div>
@@ -74,7 +74,7 @@ const SingleDocItem: React.FC<ISingleDocItemProps> = ({ context, column, item, o
             const editUrl = `${item["ServerRedirectedEmbedUrl"]}&action=edit`;
             return (
                 <div>     
-                    <a href={editUrl} target='_blank' className={styles['document-a']}>
+                    <a href={editUrl} target='_blank' className={styles['document-a']} style={{  color: text_color }}>
                         <img src={fileIconUrl} className="me-1" alt="File icon" />
                         {fileName}
                     </a>
@@ -83,11 +83,35 @@ const SingleDocItem: React.FC<ISingleDocItemProps> = ({ context, column, item, o
         }
     }
 
+    // if (column.internalName === "FileLeafRef") {
+    //     const fileName = item[column.internalName];
+    //     const fileIconUrl = getFileIconUrl(fileName);
+
+    //     if (item["FileSystemObjectType"] === "1") {
+    //         return (
+    //             <div className={styles['document-a']} onClick={handleDirectoryClick} style={{ cursor: 'pointer', color: text_color }}>
+    //                 <img src="https://res.cdn.office.net/files/fabric-cdn-prod_20240129.001/assets/item-types/20/folder.svg" className="me-1" alt="Folder icon" />
+    //                 {fileName}
+    //             </div>
+    //         );
+    //     } else {
+    //         const editUrl = `${item["ServerRedirectedEmbedUrl"]}&action=edit`;
+    //         return (
+    //             <div>     
+    //                 <a href={editUrl} target='_blank' className={styles['document-a']} style={{ color: text_color }}>
+    //                     <img src={fileIconUrl} className="me-1" alt="File icon" />
+    //                     {fileName}
+    //                 </a>
+    //             </div>
+    //         );
+    //     }
+    // }
+
     if (column.type === "User") {
-        return <div>{userName}</div>;
+        return <div style={{ color: text_color }}>{userName}</div>;
     }
 
-    return <div>{item[column.internalName]}</div>;
+    return <div style={{ color: text_color }}>{item[column.internalName]}</div>;
 };
 
 export default SingleDocItem;

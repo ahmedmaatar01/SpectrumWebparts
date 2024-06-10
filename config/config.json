@@ -5,15 +5,15 @@
     "ged-365-webpart-web-part": {
       "components": [
         {
-          "entrypoint": "./lib/webparts/ged365Webpart/Ged365WebpartWebPart.js",
-          "manifest": "./src/webparts/ged365Webpart/Ged365WebpartWebPart.manifest.json"
+          "entrypoint": "./lib/webparts/DashboardWebpart/Ged365WebpartWebPart.js",
+          "manifest": "./src/webparts/DashboardWebpart/Ged365WebpartWebPart.manifest.json"
         }
       ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "Ged365WebpartWebPartStrings": "lib/webparts/ged365Webpart/loc/{locale}.js",
+    "Ged365WebpartWebPartStrings": "lib/webparts/DashboardWebpart/loc/{locale}.js",
     "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js"
   }
 }
