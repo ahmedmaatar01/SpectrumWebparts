@@ -2,60 +2,53 @@
 
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 
-import { SPHttpClient, SPHttpClientResponse, ISPHttpClientOptions } from "@microsoft/sp-http";
+import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { IDropdownOption } from "office-ui-fabric-react";
 export class SPOperations {
 
+    /**
+     * Update a list item
+     * @param context The web part context
+     * @param listTitle The title of the list
+     * @param itemId The ID of the item to update
+     * @param item The updated item data
+     */
 
- /**
-   * GetListItemEntityTypeFullName
-   * context: WebPartContext
-   **/
- private async GetListItemEntityTypeFullName(context: WebPartContext, listTitle: string): Promise<string> {
-    const url = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listTitle}')?$select=ListItemEntityTypeFullName`;
-    try {
-      const response = await context.spHttpClient.get(url, SPHttpClient.configurations.v1);
-      const data = await response.json();
-      return data.ListItemEntityTypeFullName;
-    } catch (error) {
-      console.error('Error fetching ListItemEntityTypeFullName:', error);
-      throw error;
+    /**
+     * Update a list item
+     * @param context The web part context
+     * @param listTitle The title of the list
+     * @param itemId The ID of the item to update
+     * @param item The updated item data
+     */
+    public UpdateListItemFields(context: WebPartContext, listTitle: string, itemId: number, fieldsToUpdate: { [key: string]: any }): Promise<string> {
+        const restApiUrl = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('${listTitle}')/items(${itemId})`;
+        const body = JSON.stringify(fieldsToUpdate);
+    
+        return new Promise<string>((resolve, reject) => {
+            context.spHttpClient.post(restApiUrl, SPHttpClient.configurations.v1, {
+                headers: {
+                    "Accept": "application/json;odata=nometadata",
+                    "Content-Type": "application/json;odata=nometadata",
+                    "odata-version": "",
+                    "IF-MATCH": "*",
+                    "X-HTTP-METHOD": "MERGE",
+                },
+                body: body,
+            })
+            .then((response: SPHttpClientResponse) => {
+                if (response.ok) {
+                    resolve(`Item with ID ${itemId} updated successfully`);
+                } else {
+                    reject(`Error updating item: ${response.statusText}`);
+                }
+            }, (error: any) => {
+                reject(`Error updating item: ${error}`);
+            });
+        });
     }
-  }
+    
 
-  /**
-   * UpdateListItem
-   * context: WebPartContext
-   **/
-  public async UpdateListItem(context: WebPartContext, listTitle: string, itemId: number, updatedFields: any): Promise<void> {
-    const entityTypeFullName = await this.GetListItemEntityTypeFullName(context, listTitle);
-    const url = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getbytitle('${listTitle}')/items(${itemId})`;
-    const spHttpClientOptions: ISPHttpClientOptions = {
-      headers: {
-        'Accept': 'application/json;odata=verbose',
-        'Content-Type': 'application/json;odata=verbose',
-        'IF-MATCH': '*',
-        'X-HTTP-Method': 'MERGE'
-      },
-      body: JSON.stringify({
-        "__metadata": { "type": entityTypeFullName },
-        ...updatedFields
-      })
-    };
-    console.log('Update URL:', url);
-    console.log('Update Options:', spHttpClientOptions);
-    try {
-      const response = await context.spHttpClient.post(url, SPHttpClient.configurations.v1, spHttpClientOptions);
-      if (!response.ok) {
-        const errorResponse = await response.json();
-        console.error('Error updating item:', errorResponse);
-        throw new Error(`Error updating item: ${errorResponse.error.message}`);
-      }
-    } catch (error) {
-      console.error('Error updating item:', error);
-      throw error;
-    }
-  }
 
 
     /**

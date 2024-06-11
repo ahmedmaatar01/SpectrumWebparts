@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { SPListItem, SPListColumn, SPOperations } from "../../../Services/SPServices";
+import { SPListItem, SPListColumn ,SPOperations} from "../../../Services/SPServices";
 
 interface IEditModalProps {
     show: boolean;
@@ -31,16 +31,25 @@ const EditModal: React.FC<IEditModalProps> = ({ show, handleClose, item, columns
     };
 
     const handleSubmit = async () => {
+        if (!item) return;
+
         setError(null);
-        if (item) {
-            const spOperations = new SPOperations();
-            try {
-                await spOperations.UpdateListItem(context, listTitle, item.Id, formData);
-                handleSave(formData);
-                handleClose();
-            } catch (error) {
-                setError(error.message);
+
+        const fieldsToUpdate: { [key: string]: any } = {};
+
+        for (const key in formData) {
+            if (formData[key] !== item[key]) {
+                fieldsToUpdate[key] = formData[key];
             }
+        }
+
+        try {
+            await new SPOperations().UpdateListItemFields(context, listTitle, item.Id, fieldsToUpdate);
+            handleSave({ ...item, ...fieldsToUpdate });
+            handleClose();
+        } catch (error) {
+            setError('Error updating item.');
+            console.error(error);
         }
     };
 

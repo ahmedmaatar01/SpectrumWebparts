@@ -14,7 +14,7 @@ interface ITableRenderProps {
     table_items: SPListItem[];
     onDirectoryClick: (path: string) => void;
     text_color: string;
-    listTitle: string; // Add listTitle prop
+    listTitle: string;
 }
 
 const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, table_items, text_color, onDirectoryClick, listTitle }) => {
@@ -113,8 +113,8 @@ const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, tab
                 handleClose={handleCloseModal}
                 item={selectedItem}
                 columns={filteredHeadings}
-                context={context} // Pass context prop
-                listTitle={listTitle} // Pass listTitle prop
+                context={context}
+                listTitle={listTitle}
                 handleSave={handleSave}
             />
         </div>
