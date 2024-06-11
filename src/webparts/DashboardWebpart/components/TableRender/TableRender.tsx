@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { SPListItem, SPListColumn } from "../../../Services/SPServices";
+import { SPListItem, SPListColumn, SPOperations } from "../../../Services/SPServices";
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min.js';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import SingleDocItem from '../Divers/SingleDocItem';
 import EditModal from '../Divers/EditModal';
+import { Modal, Button } from 'react-bootstrap';
 import styles from '../Ged365Webpart.module.scss';
 
 interface ITableRenderProps {
@@ -21,7 +22,8 @@ const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, tab
     const [docItems, setDocItems] = useState<SPListItem[]>([]);
     const [sortColumn, setSortColumn] = useState<string>('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-    const [showModal, setShowModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState<SPListItem | null>(null);
 
     useEffect(() => {
@@ -54,15 +56,34 @@ const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, tab
 
     const handleEditClick = (item: SPListItem) => {
         setSelectedItem(item);
-        setShowModal(true);
+        setShowEditModal(true);
     };
 
-    const handleCloseModal = () => setShowModal(false);
+    const handleDeleteClick = (item: SPListItem) => {
+        setSelectedItem(item);
+        setShowDeleteModal(true);
+    };
+
+    const handleCloseEditModal = () => setShowEditModal(false);
+    const handleCloseDeleteModal = () => setShowDeleteModal(false);
 
     const handleSave = (updatedItem: SPListItem) => {
         setDocItems(prevItems => 
             prevItems.map(item => item.Id === updatedItem.Id ? updatedItem : item)
         );
+    };
+
+    const confirmDelete = async () => {
+        if (!selectedItem) return;
+
+        try {
+            await new SPOperations().DeleteListItem(context, listTitle, selectedItem.Id);
+            setDocItems(prevItems => prevItems.filter(item => item.Id !== selectedItem.Id));
+        } catch (error) {
+            console.error('Error deleting item:', error);
+        } finally {
+            setShowDeleteModal(false);
+        }
     };
 
     return (
@@ -100,7 +121,7 @@ const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, tab
                                 ))}
                                 <td>
                                     <a style={{ color: text_color }} href="#" onClick={() => handleEditClick(item)}><i className="fa-solid fa-pen-to-square me-2"></i></a>
-                                    <a style={{ color: text_color }} href="#"><i className="fa-solid fa-trash"></i></a>
+                                    <a style={{ color: text_color }} href="#" onClick={() => handleDeleteClick(item)}><i className="fa-solid fa-trash"></i></a>
                                 </td>
                             </tr>
                         ))}
@@ -109,14 +130,31 @@ const TableRender: React.FC<ITableRenderProps> = ({ context, table_headings, tab
             </div>
 
             <EditModal
-                show={showModal}
-                handleClose={handleCloseModal}
+                show={showEditModal}
+                handleClose={handleCloseEditModal}
                 item={selectedItem}
                 columns={filteredHeadings}
                 context={context}
                 listTitle={listTitle}
                 handleSave={handleSave}
             />
+
+            <Modal show={showDeleteModal} onHide={handleCloseDeleteModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Delete</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete "{selectedItem?.FileLeafRef}"?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseDeleteModal}>
+                        No
+                    </Button>
+                    <Button variant="danger" onClick={confirmDelete}>
+                        Yes
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

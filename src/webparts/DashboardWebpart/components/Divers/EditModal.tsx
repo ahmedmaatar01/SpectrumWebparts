@@ -16,6 +16,7 @@ const EditModal: React.FC<IEditModalProps> = ({ show, handleClose, item, columns
     const [formData, setFormData] = useState<SPListItem>({} as SPListItem);
     const [fileNameWithoutExtension, setFileNameWithoutExtension] = useState<string>('');
     const [fileExtension, setFileExtension] = useState<string>('');
+    const [users, setUsers] = useState<{ id: number, title: string }[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -35,7 +36,24 @@ const EditModal: React.FC<IEditModalProps> = ({ show, handleClose, item, columns
         }
     }, [item]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        // Fetch users if any of the columns are of type "User"
+        if (columns.some(column => column.type === 'User')) {
+            fetchUsers();
+        }
+    }, [columns]);
+
+    const fetchUsers = async () => {
+        try {
+            const users = await new SPOperations().GetUsers(context);
+            setUsers(users);
+        } catch (error) {
+            setError('Error fetching users.');
+            console.error(error);
+        }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement >) => {
         const { name, value } = e.target;
         if (name === 'FileLeafRef') {
             if (!value.includes('.')) {
@@ -51,25 +69,25 @@ const EditModal: React.FC<IEditModalProps> = ({ show, handleClose, item, columns
 
     const handleSubmit = async () => {
         if (!item) return;
-    
+
         setError(null);
         setSuccessMessage(null);
         setLoading(true);
-    
+
         const fieldsToUpdate: { [key: string]: any } = {};
-    
+
         // Check each field in formData and include only changed fields
         for (const key in formData) {
             if (formData[key] !== item[key] && key !== '@odata.type' && key !== '@odata.id' && key !== '@odata.etag' && key !== '@odata.editLink') {
                 fieldsToUpdate[key] = formData[key];
             }
         }
-    
+
         // Handle the file name separately
         fieldsToUpdate['FileLeafRef'] = `${fileNameWithoutExtension}${fileExtension}`;
-    
+
         console.log("Updating item with fields:", fieldsToUpdate);
-    
+
         try {
             await new SPOperations().UpdateListItemFields(context, listTitle, item.Id, fieldsToUpdate);
             handleSave({ ...item, ...fieldsToUpdate });
@@ -82,7 +100,6 @@ const EditModal: React.FC<IEditModalProps> = ({ show, handleClose, item, columns
             setLoading(false);
         }
     };
-    
 
     return (
         <Modal show={show} onHide={handleClose}>
@@ -114,6 +131,18 @@ const EditModal: React.FC<IEditModalProps> = ({ show, handleClose, item, columns
                                         <option value="">Select...</option>
                                         {heading.choices && heading.choices.map(choice => (
                                             <option key={choice} value={choice}>{choice}</option>
+                                        ))}
+                                    </Form.Control>
+                                ) : heading.type === "User" ? (
+                                    <Form.Control
+                                        as="select"
+                                        name={heading.internalName}
+                                        value={formData[heading.internalName] || ''}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">Select a user...</option>
+                                        {users.map(user => (
+                                            <option key={user.id} value={user.id}>{user.title}</option>
                                         ))}
                                     </Form.Control>
                                 ) : (

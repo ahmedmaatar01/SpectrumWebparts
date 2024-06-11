@@ -6,13 +6,41 @@ import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { IDropdownOption } from "office-ui-fabric-react";
 export class SPOperations {
 
-    /**
-     * Update a list item
-     * @param context The web part context
-     * @param listTitle The title of the list
-     * @param itemId The ID of the item to update
-     * @param item The updated item data
-     */
+    public async GetUsers(context: WebPartContext): Promise<{ id: number, title: string }[]> {
+        const restApiUrl = `${context.pageContext.web.absoluteUrl}/_api/web/siteusers`;
+        try {
+            const response = await context.spHttpClient.get(restApiUrl, SPHttpClient.configurations.v1);
+            const data = await response.json();
+            return data.value.map((user: any) => ({ id: user.Id, title: user.Title }));
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            throw error;
+        }
+    }
+    public DeleteListItem(context: WebPartContext, listTitle: string, itemId: number): Promise<string> {
+        const restApiUrl = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('${listTitle}')/items(${itemId})`;
+    
+        return new Promise<string>((resolve, reject) => {
+            context.spHttpClient.post(restApiUrl, SPHttpClient.configurations.v1, {
+                headers: {
+                    Accept: "application/json;odata=nometadata",
+                    "Content-Type": "application/json;odata=nometadata",
+                    "odata-version": "",
+                    "IF-MATCH": "*",
+                    "X-HTTP-METHOD": "DELETE",
+                }
+            }).then((response: SPHttpClientResponse) => {
+                if (response.ok) {
+                    resolve(`Item with ID ${itemId} deleted successfully`);
+                } else {
+                    reject(`Error deleting item: ${response.statusText}`);
+                }
+            }, (error: any) => {
+                reject(`Error deleting item: ${error}`);
+            });
+        });
+    }
+    
 
     /**
      * Update a list item
