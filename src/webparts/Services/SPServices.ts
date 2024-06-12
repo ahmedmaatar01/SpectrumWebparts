@@ -11,6 +11,8 @@ export class SPOperations {
         try {
             const response = await context.spHttpClient.get(restApiUrl, SPHttpClient.configurations.v1);
             const data = await response.json();
+            console.log("==========users from service========")
+            console.log(data)
             return data.value.map((user: any) => ({ id: user.Id, title: user.Title }));
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -142,10 +144,9 @@ export class SPOperations {
 
                         listItems = results.value;
                         resolve(listItems);
+                        console.log("+-+-+-+-+-+-+-+listItems From Service+-+-+-+-+-+-+-+");
+                        console.log(results.value);
                     });
-                    console.log("listItems");
-                    console.log(listItems);
-
                 },
                 (error: any): void => {
                     reject("error: " + error);

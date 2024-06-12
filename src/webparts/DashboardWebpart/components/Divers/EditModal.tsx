@@ -37,7 +37,6 @@ const EditModal: React.FC<IEditModalProps> = ({ show, handleClose, item, columns
     }, [item]);
 
     useEffect(() => {
-        // Fetch users if any of the columns are of type "User"
         if (columns.some(column => column.type === 'User')) {
             fetchUsers();
         }
@@ -53,12 +52,18 @@ const EditModal: React.FC<IEditModalProps> = ({ show, handleClose, item, columns
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement >) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         if (name === 'FileLeafRef') {
             if (!value.includes('.')) {
                 setFileNameWithoutExtension(value);
             }
+        } else if (name.endsWith("Id")) {
+            const fieldName = name.replace("Id", "");
+            setFormData(prevState => ({
+                ...prevState,
+                [fieldName]: value
+            }));
         } else {
             setFormData(prevState => ({
                 ...prevState,
@@ -76,15 +81,17 @@ const EditModal: React.FC<IEditModalProps> = ({ show, handleClose, item, columns
 
         const fieldsToUpdate: { [key: string]: any } = {};
 
-        // Check each field in formData and include only changed fields
         for (const key in formData) {
             if (formData[key] !== item[key] && key !== '@odata.type' && key !== '@odata.id' && key !== '@odata.etag' && key !== '@odata.editLink') {
-                fieldsToUpdate[key] = formData[key];
+                if (key === 'FileLeafRef') {
+                    fieldsToUpdate[key] = `${fileNameWithoutExtension}${fileExtension}`;
+                } else if (columns.some(column => column.internalName === key && column.type === 'User')) {
+                    fieldsToUpdate[`${key}Id`] = formData[key];
+                } else {
+                    fieldsToUpdate[key] = formData[key];
+                }
             }
         }
-
-        // Handle the file name separately
-        fieldsToUpdate['FileLeafRef'] = `${fileNameWithoutExtension}${fileExtension}`;
 
         console.log("Updating item with fields:", fieldsToUpdate);
 
@@ -136,8 +143,8 @@ const EditModal: React.FC<IEditModalProps> = ({ show, handleClose, item, columns
                                 ) : heading.type === "User" ? (
                                     <Form.Control
                                         as="select"
-                                        name={heading.internalName}
-                                        value={formData[heading.internalName] || ''}
+                                        name={`${heading.internalName}Id`}
+                                        value={formData[`${heading.internalName}Id`] || ''}
                                         onChange={handleChange}
                                     >
                                         <option value="">Select a user...</option>
